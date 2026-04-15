@@ -2,11 +2,14 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Package, ArrowLeftRight, ShoppingCart,
-  ClipboardList, BarChart3, FileText, Brain, TrendingUp
+  ClipboardList, Brain, FileText, TrendingUp, X
 } from 'lucide-react'
 import clsx from 'clsx'
 
-interface SidebarProps { open: boolean }
+interface SidebarProps {
+  open: boolean
+  onClose: () => void
+}
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label_kz: 'Дашборд', label_ru: 'Панель' },
@@ -18,32 +21,37 @@ const navItems = [
   { to: '/reports', icon: FileText, label_kz: 'Есептер', label_ru: 'Отчёты' },
 ]
 
-export default function Sidebar({ open }: SidebarProps) {
+export default function Sidebar({ open, onClose }: SidebarProps) {
   return (
-    <aside className={clsx(
-      'flex flex-col bg-slate-900 dark:bg-slate-950 transition-all duration-300 ease-in-out',
-      open ? 'w-64' : 'w-16'
-    )}>
+    <aside className="flex flex-col h-full bg-slate-900 dark:bg-slate-950 w-64">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-slate-800">
-        <div className="w-9 h-9 rounded-xl bg-primary-500 flex items-center justify-center flex-shrink-0">
-          <TrendingUp size={20} className="text-white" />
-        </div>
-        {open && (
+      <div className="flex items-center justify-between px-4 py-4 border-b border-slate-800 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-primary-500 flex items-center justify-center flex-shrink-0">
+            <TrendingUp size={20} className="text-white" />
+          </div>
           <div>
             <div className="text-white font-bold text-lg leading-tight">StockIQ</div>
             <div className="text-slate-400 text-xs leading-tight">Зияткерлік жүйе</div>
           </div>
-        )}
+        </div>
+        {/* Close button — mobile only */}
+        <button
+          onClick={onClose}
+          className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+        >
+          <X size={16} />
+        </button>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 py-4 space-y-1 px-2">
+      <nav className="flex-1 py-3 space-y-0.5 px-2 overflow-y-auto">
         {navItems.map(({ to, icon: Icon, label_kz, label_ru }) => (
           <NavLink
             key={to}
             to={to}
             end={to === '/'}
+            onClick={onClose}
             className={({ isActive }) =>
               clsx(
                 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150',
@@ -54,24 +62,18 @@ export default function Sidebar({ open }: SidebarProps) {
             }
           >
             <Icon size={18} className="flex-shrink-0" />
-            {open && (
-              <div className="flex flex-col leading-tight">
-                <span className="text-xs font-semibold">{label_kz}</span>
-                <span className="text-[10px] opacity-60">{label_ru}</span>
-              </div>
-            )}
+            <div className="flex flex-col leading-tight min-w-0">
+              <span className="text-xs font-semibold truncate">{label_kz}</span>
+              <span className="text-[10px] opacity-60 truncate">{label_ru}</span>
+            </div>
           </NavLink>
         ))}
       </nav>
 
       {/* Bottom */}
-      {open && (
-        <div className="p-4 border-t border-slate-800">
-          <div className="text-xs text-slate-500 text-center">
-            Дипломдық жоба • 2024
-          </div>
-        </div>
-      )}
+      <div className="p-4 border-t border-slate-800 flex-shrink-0">
+        <div className="text-xs text-slate-500 text-center">Дипломдық жоба • 2024</div>
+      </div>
     </aside>
   )
 }

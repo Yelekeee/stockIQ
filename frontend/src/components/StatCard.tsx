@@ -23,20 +23,21 @@ const colors = {
 export default function StatCard({ title_kz, title_ru, value, subtitle, icon: Icon, color, trend }: StatCardProps) {
   const c = colors[color]
   return (
-    <div className="card p-5 flex items-center gap-4">
-      <div className={clsx('w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0', c.icon)}>
-        <Icon size={22} className="text-white" />
+    <div className="card p-3 sm:p-5 flex items-center gap-3 sm:gap-4">
+      <div className={clsx('w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center flex-shrink-0', c.icon)}>
+        <Icon size={18} className="text-white sm:hidden" />
+        <Icon size={22} className="text-white hidden sm:block" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex flex-col leading-tight mb-1">
-          <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">{title_kz}</span>
-          <span className="text-[10px] text-slate-400">{title_ru}</span>
+        <div className="flex flex-col leading-tight mb-0.5 sm:mb-1">
+          <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{title_kz}</span>
+          <span className="text-[10px] text-slate-400 hidden sm:block">{title_ru}</span>
         </div>
-        <div className="text-2xl font-bold text-slate-900 dark:text-slate-100 truncate">{value}</div>
-        {subtitle && <div className="text-xs text-slate-400 mt-0.5">{subtitle}</div>}
+        <div className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-slate-100 truncate">{value}</div>
+        {subtitle && <div className="text-[10px] sm:text-xs text-slate-400 mt-0.5">{subtitle}</div>}
       </div>
       {trend !== undefined && (
-        <div className={clsx('text-xs font-semibold', trend >= 0 ? 'text-emerald-500' : 'text-red-500')}>
+        <div className={clsx('text-xs font-semibold flex-shrink-0', trend >= 0 ? 'text-emerald-500' : 'text-red-500')}>
           {trend >= 0 ? '+' : ''}{trend}%
         </div>
       )}

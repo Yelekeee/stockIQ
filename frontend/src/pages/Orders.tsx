@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import { Plus, Zap, CheckCircle, XCircle, Send, Clock } from 'lucide-react'
+import { Plus, Zap, CheckCircle, XCircle, Send, Clock, X } from 'lucide-react'
 import { ordersApi, productsApi } from '../services/api'
 import type { PurchaseOrder, Product } from '../types'
 import LoadingSpinner from '../components/LoadingSpinner'
 
 const STATUS_CONFIG = {
-  draft: { label: 'Жоба / Черновик', color: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200', icon: Clock },
-  sent: { label: 'Жіберілді / Отправлен', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300', icon: Send },
-  received: { label: 'Алынды / Получен', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300', icon: CheckCircle },
-  cancelled: { label: 'Болдырылмаған / Отменён', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300', icon: XCircle }
+  draft: { label_kz: 'Жоба', label_ru: 'Черновик', color: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200', icon: Clock },
+  sent: { label_kz: 'Жіберілді', label_ru: 'Отправлен', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300', icon: Send },
+  received: { label_kz: 'Алынды', label_ru: 'Получен', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300', icon: CheckCircle },
+  cancelled: { label_kz: 'Болдырылмаған', label_ru: 'Отменён', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300', icon: XCircle }
 }
 
 const URGENCY_CONFIG = {
@@ -54,11 +54,11 @@ export default function Orders() {
   useEffect(() => { load() }, [statusFilter])
 
   const handleAutoGenerate = async () => {
-    if (!confirm('ML моделі негізінде тапсырыстарды автоматты түрде жасайсыз ба? / Автоматически создать заказы на основе ML-модели?')) return
+    if (!confirm('ML моделі негізінде тапсырыстарды автоматты түрде жасайсыз ба?')) return
     setAutoGenerating(true)
     try {
       const res = await ordersApi.autoGenerate()
-      alert(`${res.data.length} тапсырыс жасалды! / ${res.data.length} заказов создано!`)
+      alert(`${res.data.length} тапсырыс жасалды!`)
       load()
     } finally {
       setAutoGenerating(false)
@@ -90,74 +90,86 @@ export default function Orders() {
     }
   }
 
+  const TABS = [
+    { id: '', label: 'Барлығы' },
+    { id: 'draft', label: 'Жоба' },
+    { id: 'sent', label: 'Жіберілді' },
+    { id: 'received', label: 'Алынды' },
+    { id: 'cancelled', label: 'Болдырылмаған' }
+  ]
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-5">
+      {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Сатып алу тапсырыстары</h1>
-          <p className="text-slate-400 text-sm">Заказы на закупку</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">Сатып алу тапсырыстары</h1>
+          <p className="text-slate-400 text-xs sm:text-sm">Заказы на закупку</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-shrink-0">
           <button onClick={handleAutoGenerate} disabled={autoGenerating} className="btn-secondary">
-            <Zap size={16} className={autoGenerating ? 'animate-pulse text-amber-500' : 'text-amber-500'} />
-            {autoGenerating ? 'Жасалуда...' : 'ML Авто-тапсырыс'}
+            <Zap size={14} className={autoGenerating ? 'animate-pulse text-amber-500' : 'text-amber-500'} />
+            <span className="hidden sm:inline">{autoGenerating ? 'Жасалуда...' : 'ML Авто-тапсырыс'}</span>
+            <span className="sm:hidden">{autoGenerating ? '...' : 'ML'}</span>
           </button>
           <button onClick={() => setShowForm(!showForm)} className="btn-primary">
-            <Plus size={16} /> Тапсырыс
+            <Plus size={16} />
+            <span className="hidden sm:inline">Тапсырыс</span>
           </button>
         </div>
       </div>
 
       {/* Form */}
       {showForm && (
-        <div className="card p-5">
-          <h3 className="font-semibold text-slate-800 dark:text-slate-100 mb-4">Жаңа тапсырыс / Новый заказ</h3>
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div>
-              <label className="label">Тауар / Товар *</label>
-              <select className="select" required value={form.product_id}
-                onChange={e => {
-                  const prod = products.find(p => p.id === parseInt(e.target.value))
-                  setForm(f => ({ ...f, product_id: e.target.value, unit_price: prod ? String(prod.purchase_price) : '' }))
-                }}>
-                <option value="">Таңдаңыз...</option>
-                {products.map(p => <option key={p.id} value={p.id}>{p.name_ru} (қор: {p.current_stock})</option>)}
-              </select>
+        <div className="card p-4 sm:p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-sm sm:text-base text-slate-800 dark:text-slate-100">Жаңа тапсырыс / Новый заказ</h3>
+            <button onClick={() => setShowForm(false)} className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"><X size={16} /></button>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="label">Тауар / Товар *</label>
+                <select className="select" required value={form.product_id}
+                  onChange={e => {
+                    const prod = products.find(p => p.id === parseInt(e.target.value))
+                    setForm(f => ({ ...f, product_id: e.target.value, unit_price: prod ? String(prod.purchase_price) : '' }))
+                  }}>
+                  <option value="">Таңдаңыз...</option>
+                  {products.map(p => <option key={p.id} value={p.id}>{p.name_ru} ({p.current_stock})</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="label">Мөлшер / Количество *</label>
+                <input className="input" type="number" required min="1" value={form.ordered_qty}
+                  onChange={e => setForm(f => ({ ...f, ordered_qty: e.target.value }))} placeholder="0" />
+              </div>
+              <div>
+                <label className="label">Баға / Цена (₸)</label>
+                <input className="input" type="number" min="0" value={form.unit_price}
+                  onChange={e => setForm(f => ({ ...f, unit_price: e.target.value }))} placeholder="0" />
+              </div>
             </div>
-            <div>
-              <label className="label">Мөлшер / Количество *</label>
-              <input className="input" type="number" required min="1" value={form.ordered_qty}
-                onChange={e => setForm(f => ({ ...f, ordered_qty: e.target.value }))} />
-            </div>
-            <div>
-              <label className="label">Баға / Цена (₸)</label>
-              <input className="input" type="number" min="0" value={form.unit_price}
-                onChange={e => setForm(f => ({ ...f, unit_price: e.target.value }))} />
-            </div>
-            <div className="flex items-end gap-2">
-              <button type="submit" disabled={saving} className="btn-primary flex-1">
-                {saving ? 'Жасалуда...' : 'Жасау'}
+            <div className="flex gap-2 pt-1">
+              <button type="submit" disabled={saving} className="btn-primary flex-1 justify-center">
+                {saving ? 'Жасалуда...' : 'Жасау / Создать'}
               </button>
-              <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">✕</button>
+              <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">Болдырмау</button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Status Filter */}
-      <div className="flex gap-2 border-b border-slate-100 dark:border-slate-800">
-        {[
-          { id: '', label: 'Барлығы / Все' },
-          { id: 'draft', label: 'Жоба' },
-          { id: 'sent', label: 'Жіберілді' },
-          { id: 'received', label: 'Алынды' },
-          { id: 'cancelled', label: 'Болдырылмаған' }
-        ].map(t => (
+      {/* Status Tabs */}
+      <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-x-auto">
+        {TABS.map(t => (
           <button
             key={t.id}
             onClick={() => setStatusFilter(t.id)}
-            className={`px-4 py-2 text-sm font-medium transition-colors ${
-              statusFilter === t.id ? 'border-b-2 border-primary-500 text-primary-600' : 'text-slate-500 hover:text-slate-700'
+            className={`flex-shrink-0 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
+              statusFilter === t.id
+                ? 'bg-white dark:bg-slate-900 text-primary-600 shadow-sm'
+                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
             }`}
           >
             {t.label}
@@ -165,24 +177,85 @@ export default function Orders() {
         ))}
       </div>
 
-      {/* Table */}
-      <div className="card overflow-hidden">
+      {/* Mobile cards */}
+      <div className="block sm:hidden space-y-3">
+        {loading ? (
+          <div className="py-16"><LoadingSpinner size="lg" className="mx-auto" /></div>
+        ) : orders.length === 0 ? (
+          <div className="card p-8 text-center text-slate-400 text-sm">Тапсырыстар жоқ</div>
+        ) : (
+          orders.map(o => {
+            const sc = STATUS_CONFIG[o.status]
+            const Icon = sc.icon
+            return (
+              <div key={o.id} className="card p-3.5 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="font-semibold text-sm text-slate-800 dark:text-slate-100 truncate">
+                      {o.product?.name_ru || `Тауар #${o.product_id}`}
+                    </div>
+                    <div className="text-xs text-slate-400">{o.product?.sku} · #{o.id}</div>
+                  </div>
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium flex-shrink-0 ${sc.color}`}>
+                    <Icon size={10} />{sc.label_kz}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs text-slate-500">
+                  <span>{o.ordered_qty} {o.product?.unit}</span>
+                  <span className="font-semibold text-emerald-600">{o.estimated_cost ? formatMoney(o.estimated_cost) : '—'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`badge text-[10px] ${URGENCY_CONFIG[o.urgency_level as keyof typeof URGENCY_CONFIG] || 'badge-ok'}`}>
+                      {URGENCY_LABELS[o.urgency_level as keyof typeof URGENCY_LABELS] || o.urgency_level}
+                    </span>
+                    {o.is_auto_generated && <span className="badge bg-violet-100 text-violet-700 text-[10px]">ML ⚡</span>}
+                  </div>
+                  <div className="flex gap-1">
+                    {o.status === 'draft' && (
+                      <>
+                        <button onClick={() => handleStatusChange(o.id, 'sent')}
+                          className="px-2 py-1 text-[10px] bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100">
+                          Жіберу
+                        </button>
+                        <button onClick={() => handleStatusChange(o.id, 'cancelled')}
+                          className="px-2 py-1 text-[10px] bg-red-50 text-red-600 rounded-lg hover:bg-red-100">
+                          Болдырмау
+                        </button>
+                      </>
+                    )}
+                    {o.status === 'sent' && (
+                      <button onClick={() => handleStatusChange(o.id, 'received')}
+                        className="px-2 py-1 text-[10px] bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100">
+                        Алынды
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <div className="card overflow-hidden hidden sm:block">
         {loading ? (
           <div className="py-20"><LoadingSpinner size="lg" className="mx-auto" /></div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[800px]">
               <thead>
                 <tr className="border-b border-slate-100 dark:border-slate-800">
                   <th className="text-left px-4 py-3 table-header">#</th>
                   <th className="text-left px-4 py-3 table-header">Тауар / Товар</th>
-                  <th className="text-left px-4 py-3 table-header">Жеткізуші / Поставщик</th>
-                  <th className="text-right px-4 py-3 table-header">Мөлшер / Кол-во</th>
-                  <th className="text-right px-4 py-3 table-header">Сомасы / Сумма</th>
-                  <th className="text-center px-4 py-3 table-header">Күйі / Статус</th>
+                  <th className="text-left px-4 py-3 table-header">Жеткізуші</th>
+                  <th className="text-right px-4 py-3 table-header">Мөлшер</th>
+                  <th className="text-right px-4 py-3 table-header">Сомасы</th>
+                  <th className="text-center px-4 py-3 table-header">Күйі</th>
                   <th className="text-center px-4 py-3 table-header">Шұғылдық</th>
                   <th className="text-center px-4 py-3 table-header">ML?</th>
-                  <th className="text-left px-4 py-3 table-header">Күні / Дата</th>
+                  <th className="text-left px-4 py-3 table-header">Күні</th>
                   <th className="text-right px-4 py-3 table-header">Әрекет</th>
                 </tr>
               </thead>
@@ -209,7 +282,7 @@ export default function Orders() {
                       <td className="px-4 py-3 text-center">
                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium ${sc.color}`}>
                           <Icon size={11} />
-                          {sc.label.split(' / ')[0]}
+                          {sc.label_kz}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
@@ -220,7 +293,7 @@ export default function Orders() {
                       <td className="px-4 py-3 text-center">
                         {o.is_auto_generated ? (
                           <span className="badge bg-violet-100 text-violet-700">ML ⚡</span>
-                        ) : <span className="text-slate-300 text-xs">Қол / Ручной</span>}
+                        ) : <span className="text-slate-300 text-xs">Қол</span>}
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-400">
                         {new Date(o.created_at).toLocaleDateString('kk-KZ')}
@@ -228,25 +301,19 @@ export default function Orders() {
                       <td className="px-4 py-3 text-right">
                         {o.status === 'draft' && (
                           <div className="flex gap-1 justify-end">
-                            <button
-                              onClick={() => handleStatusChange(o.id, 'sent')}
-                              className="px-2 py-1 text-xs bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
-                            >
+                            <button onClick={() => handleStatusChange(o.id, 'sent')}
+                              className="px-2 py-1 text-xs bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
                               Жіберу
                             </button>
-                            <button
-                              onClick={() => handleStatusChange(o.id, 'cancelled')}
-                              className="px-2 py-1 text-xs bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
-                            >
+                            <button onClick={() => handleStatusChange(o.id, 'cancelled')}
+                              className="px-2 py-1 text-xs bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors">
                               Болдырмау
                             </button>
                           </div>
                         )}
                         {o.status === 'sent' && (
-                          <button
-                            onClick={() => handleStatusChange(o.id, 'received')}
-                            className="px-2 py-1 text-xs bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors"
-                          >
+                          <button onClick={() => handleStatusChange(o.id, 'received')}
+                            className="px-2 py-1 text-xs bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors">
                             Алынды
                           </button>
                         )}

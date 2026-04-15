@@ -85,18 +85,18 @@ export default function ProductForm() {
   if (loading) return <div className="flex items-center justify-center h-64"><LoadingSpinner size="lg" /></div>
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      <div className="flex items-center gap-4">
-        <button onClick={() => navigate(-1)} className="btn-secondary p-2"><ArrowLeft size={16} /></button>
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-            {isEdit ? 'Тауарды өңдеу / Редактировать товар' : 'Жаңа тауар / Новый товар'}
-          </h1>
-        </div>
+    <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <button onClick={() => navigate(-1)} className="btn-secondary p-2 flex-shrink-0"><ArrowLeft size={16} /></button>
+        <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
+          {isEdit ? 'Тауарды өңдеу' : 'Жаңа тауар'}
+        </h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="card p-6 space-y-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="card p-4 sm:p-6 space-y-5">
+        {/* Basic info */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>
             <label className="label">Атауы (қазақша) *</label>
             <input className="input" required value={form.name_kz} onChange={set('name_kz')} placeholder="Тауардың қазақша атауы" />
@@ -132,25 +132,27 @@ export default function ProductForm() {
           </div>
         </div>
 
-        <div className="border-t border-slate-100 dark:border-slate-800 pt-5">
+        {/* Prices */}
+        <div className="border-t border-slate-100 dark:border-slate-800 pt-4 sm:pt-5">
           <h3 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-3">Баға / Цены</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="label">Сатып алу бағасы (₸) / Закупочная цена *</label>
-              <input className="input" type="number" required min="0" value={form.purchase_price} onChange={set('purchase_price')} />
+              <label className="label">Сатып алу бағасы (₸) *</label>
+              <input className="input" type="number" required min="0" value={form.purchase_price} onChange={set('purchase_price')} placeholder="0" />
             </div>
             <div>
-              <label className="label">Сату бағасы (₸) / Цена продажи *</label>
-              <input className="input" type="number" required min="0" value={form.selling_price} onChange={set('selling_price')} />
+              <label className="label">Сату бағасы (₸) *</label>
+              <input className="input" type="number" required min="0" value={form.selling_price} onChange={set('selling_price')} placeholder="0" />
             </div>
           </div>
         </div>
 
-        <div className="border-t border-slate-100 dark:border-slate-800 pt-5">
+        {/* Stock params */}
+        <div className="border-t border-slate-100 dark:border-slate-800 pt-4 sm:pt-5">
           <h3 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-3">Қор параметрлері / Параметры запасов</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
             <div>
-              <label className="label">Қазіргі қор / Текущий остаток</label>
+              <label className="label">Қазіргі қор</label>
               <input className="input" type="number" min="0" value={form.current_stock} onChange={set('current_stock')} />
             </div>
             <div>
@@ -162,21 +164,22 @@ export default function ProductForm() {
               <input className="input" type="number" required min="0" value={form.max_stock} onChange={set('max_stock')} />
             </div>
             <div>
-              <label className="label">Жеткізу мерзімі (күн) / Срок поставки</label>
+              <label className="label">Жеткізу (күн)</label>
               <input className="input" type="number" min="1" value={form.lead_time_days} onChange={set('lead_time_days')} />
             </div>
             <div>
-              <label className="label">Тапсырыс шығыны (₸) / Стоимость заказа</label>
+              <label className="label">Тапсырыс шығыны (₸)</label>
               <input className="input" type="number" min="0" value={form.order_cost} onChange={set('order_cost')} />
             </div>
             <div>
-              <label className="label">Сақтау шығыны % / Затраты хранения %</label>
+              <label className="label">Сақтау шығыны %</label>
               <input className="input" type="number" min="0" max="1" step="0.01" value={form.holding_cost_pct} onChange={set('holding_cost_pct')} />
             </div>
           </div>
         </div>
 
-        <div className="border-t border-slate-100 dark:border-slate-800 pt-5">
+        {/* Supplier */}
+        <div className="border-t border-slate-100 dark:border-slate-800 pt-4 sm:pt-5">
           <label className="label">Жеткізуші / Поставщик</label>
           <select className="select" value={form.supplier_id} onChange={set('supplier_id')}>
             <option value="">Таңдаңыз...</option>
@@ -184,11 +187,12 @@ export default function ProductForm() {
           </select>
         </div>
 
-        <div className="flex justify-end gap-3 pt-2">
-          <button type="button" onClick={() => navigate(-1)} className="btn-secondary">
+        {/* Actions */}
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-2">
+          <button type="button" onClick={() => navigate(-1)} className="btn-secondary justify-center">
             Болдырмау / Отмена
           </button>
-          <button type="submit" disabled={saving} className="btn-primary">
+          <button type="submit" disabled={saving} className="btn-primary justify-center">
             <Save size={14} />
             {saving ? 'Сақталуда...' : 'Сақтау / Сохранить'}
           </button>
