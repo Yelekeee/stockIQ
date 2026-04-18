@@ -80,7 +80,7 @@ export default function Sidebar({ expanded, onToggleExpand, onMobileClose }: Sid
       {/* Bottom: collapse/expand toggle — desktop only */}
       <div className="border-t border-slate-800 flex-shrink-0">
         {expanded && (
-          <div className="px-4 py-2 text-xs text-slate-500 text-center">Дипломдық жоба • 2024</div>
+          <div className="px-4 py-2 text-xs text-slate-500 text-center">Дипломдық жоба • 2026</div>
         )}
         <button
           onClick={onToggleExpand}
